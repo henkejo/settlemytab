@@ -8,7 +8,7 @@ export default function HomePage() {
       <div className="w-full max-w-sm mx-auto space-y-8">
         {/* Main options */}
         <div className="space-y-6">
-        <Button
+          <Button
             asChild
             variant="outline"
             className="w-48 mx-auto block h-20 text-lg font-medium border-2 border-black rounded-3xl hover:bg-gray-50 transition-colors bg-transparent"

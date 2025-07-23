@@ -5,7 +5,6 @@ import { ArrowLeft, Plus, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import Link from "next/link"
 import type { Bill, BillItem, User as UserType } from "@/lib/types"
 
 // Mock data for demonstration
@@ -68,19 +67,6 @@ export default function ManualEntryPage() {
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
       <div className="w-full max-w-sm bg-white min-h-screen shadow-lg">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
-          <div className="flex items-center justify-between">
-            <Link href="/">
-              <Button variant="ghost" size="sm" className="p-2">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
-            <h1 className="text-lg font-medium">New tab</h1>
-            <div className="w-9" /> {/* Spacer */}
-          </div>
-        </div>
-
         {/* Receipt Container */}
         <div className="bg-white mx-4 my-6 border-2 border-black rounded-lg overflow-hidden shadow-sm">
           {/* Receipt Header */}
@@ -144,7 +130,7 @@ export default function ManualEntryPage() {
                           </div>
                         </div>
                       </DialogTrigger>
-                      <DialogContent className="max-w-sm">
+                      <DialogContent className="max-w-sm bg-opacity-100 bg-white">
                         <DialogHeader>
                           <DialogTitle>Edit Item</DialogTitle>
                         </DialogHeader>
@@ -234,15 +220,6 @@ export default function ManualEntryPage() {
             </div>
           </DialogContent>
         </Dialog>
-
-        {/* Footer */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 mt-auto">
-          <div className="text-center">
-            <div className="inline-block px-6 py-3 border-2 border-black rounded-full">
-              <span className="font-medium text-sm">settlemytab.com</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
