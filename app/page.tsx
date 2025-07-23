@@ -1,51 +1,41 @@
-import { DeployButton } from "@/components/deploy-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { AuthButton } from "@/components/auth-button";
-import { Hero } from "@/components/hero";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
-import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
-import { hasEnvVars } from "@/lib/utils";
-import Link from "next/link";
+import Link from "next/link"
+import { Camera, Edit3 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>Next.js Supabase Starter</Link>
-              <div className="flex items-center gap-2">
-                <DeployButton />
-              </div>
-            </div>
-            {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
-          </div>
-        </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          <Hero />
-          <main className="flex-1 flex flex-col gap-6 px-4">
-            <h2 className="font-medium text-xl mb-4">Next steps</h2>
-            {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
-          </main>
-        </div>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm mx-auto space-y-8">
+        {/* Main options */}
+        <div className="space-y-6">
+        <Button
+            asChild
+            variant="outline"
+            className="w-48 mx-auto block h-20 text-lg font-medium border-2 border-black rounded-3xl hover:bg-gray-50 transition-colors bg-transparent"
+          >
+            <Link href="/photo-upload" className="flex flex-col items-center justify-center">
+              <Camera className="size-6 mb-1" />
+              <span>Use AI on a photo</span>
+            </Link>
+          </Button>
 
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <p>
-            Powered by{" "}
-            <a
-              href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-              target="_blank"
-              className="font-bold hover:underline"
-              rel="noreferrer"
-            >
-              Supabase
-            </a>
-          </p>
-          <ThemeSwitcher />
-        </footer>
+          <div className="text-center text-gray-400 font-medium">or</div>
+
+          <Button
+            asChild
+            variant="outline"
+            className="
+              w-48 mx-auto block h-20 text-lg font-medium
+              border-2 border-black rounded-3xl hover:bg-gray-50 transition-colors bg-transparent
+            "
+          >
+            <Link href="/manual-entry" className="flex flex-col items-center justify-center">
+              <Edit3 className="size-6 mb-1" />
+              <span>Enter manually</span>
+            </Link>
+          </Button>
+        </div>
       </div>
-    </main>
-  );
+    </div>
+  )
 }
