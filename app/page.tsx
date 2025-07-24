@@ -8,6 +8,10 @@ export default function HomePage() {
       <div className="w-full max-w-sm mx-auto space-y-8">
         {/* Main options */}
         <div className="space-y-6">
+          <div className="text-center font-medium">
+            <h1 className="text-xl">settlemytab.com</h1>
+          </div>
+
           <Button
             asChild
             variant="outline"

@@ -37,15 +37,6 @@ export default function PhotoUploadPage() {
             </Button>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 mt-auto">
-          <div className="text-center">
-            <div className="inline-block px-6 py-3 border-2 border-black rounded-full">
-              <span className="font-medium text-sm">settlemytab.com</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
