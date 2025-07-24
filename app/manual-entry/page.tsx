@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft, Plus, User, Percent } from "lucide-react"
+import { ArrowLeft, Plus, Percent } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -165,7 +165,7 @@ export default function ManualEntryPage() {
 
             {/* Items List */}
             <div className="font-mono text-sm">
-              {bill.items.map((item, index) => {
+              {bill.items.map((item) => {
                 const itemTipAmount = tipPercentage > 0 ? (item.price * tipPercentage) / 100 : 0
                 const totalItemPrice = item.price + itemTipAmount
 

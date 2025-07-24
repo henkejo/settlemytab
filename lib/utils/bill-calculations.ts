@@ -32,8 +32,8 @@ export function calculateSettlements(bill: Bill, users: User[]) {
   })
 
   // Create settlements (simplified algorithm)
-  const debtors = Object.entries(balances).filter(([_, balance]) => balance > 0)
-  const creditors = Object.entries(balances).filter(([_, balance]) => balance < 0)
+  const debtors = Object.entries(balances).filter(([, balance]) => balance > 0)
+  const creditors = Object.entries(balances).filter(([, balance]) => balance < 0)
 
   debtors.forEach(([debtorId, debt]) => {
     creditors.forEach(([creditorId, credit]) => {
