@@ -1,4 +1,4 @@
-import type { Bill, User } from "@/lib/types"
+import type { Bill, Person } from "@/lib/types"
 
 export function calculateUserShare(bill: Bill, userId: string): number {
   const userItems = bill.items.filter((item) => item.assignedUsers.includes(userId))
@@ -13,7 +13,7 @@ export function calculateUserShare(bill: Bill, userId: string): number {
   return totalShare
 }
 
-export function calculateSettlements(bill: Bill, users: User[]) {
+export function calculateSettlements(bill: Bill, users: Person[]) {
   const settlements: { from: string; to: string; amount: number }[] = []
   const userShares: { [userId: string]: number } = {}
 
@@ -22,7 +22,7 @@ export function calculateSettlements(bill: Bill, users: User[]) {
     userShares[user.id] = calculateUserShare(bill, user.id)
   })
 
-  const totalBill = bill.totalAmount
+  const totalBill = bill.amount
   const averageShare = totalBill / users.length
 
   // Calculate who owes whom

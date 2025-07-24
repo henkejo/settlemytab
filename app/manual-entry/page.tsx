@@ -5,26 +5,21 @@ import { ArrowLeft, Plus, Percent } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import type { Bill, BillItem, User as UserType } from "@/lib/types"
+import type { Bill, BillItem, Person } from "@/lib/types"
 import { useRouter } from "next/navigation"
 import { EditItemModal } from "@/components/edit-item-modal"
 import { EditHeaderModal } from "@/components/edit-header-modal"
-
-// Mock data for demonstration
-const mockUsers: UserType[] = [
-  { id: "1", name: "Harry", initials: "H", color: "#000" },
-  { id: "2", name: "Zoe", initials: "Z", color: "#000" },
-]
 
 export default function ManualEntryPage() {
   const router = useRouter()
 
   const [bill, setBill] = useState<Bill>({
     id: "1",
-    restaurantName: "Mario's Pizzeria",
+    name: "Mario's Pizzeria",
     date: "23 July 2025",
     items: [],
-    totalAmount: 0,
+    percentageSurcharges: [],
+    amount: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
   })
@@ -59,7 +54,7 @@ export default function ManualEntryPage() {
     setBill((prev) => ({
       ...prev,
       items: [...prev.items, newItem],
-      totalAmount: prev.totalAmount + newItem.price,
+      amount: prev.amount + newItem.price,
     }))
 
     setNewItemName("")
@@ -81,7 +76,7 @@ export default function ManualEntryPage() {
       return {
         ...prev,
         items: newItems,
-        totalAmount: prev.totalAmount - oldPrice + price,
+        amount: prev.amount - oldPrice + price,
       }
     })
 
@@ -96,7 +91,7 @@ export default function ManualEntryPage() {
       return {
         ...prev,
         items: prev.items.filter(item => item.id !== itemId),
-        totalAmount: prev.totalAmount - itemToDelete.price,
+        amount: prev.amount - itemToDelete.price,
       }
     })
     setEditingItem(null)
@@ -105,16 +100,16 @@ export default function ManualEntryPage() {
   const handleSaveHeader = (restaurantName: string, date: string) => {
     setBill((prev) => ({
       ...prev,
-      restaurantName,
+      name: restaurantName,
       date,
     }))
   }
 
-  const getUserInitials = (userIds: string[]) => {
-    return userIds.map((id) => mockUsers.find((u) => u.id === id)?.initials).filter(Boolean)
+  const getUserInitials = (users: Person[]) => {
+    return users.map((user) => user.name.slice(0, 2).toUpperCase()).filter(Boolean)
   }
 
-  const subtotal = bill.totalAmount
+  const subtotal = bill.amount
   const tipAmount = (subtotal * tipPercentage) / 100
   const total = subtotal + tipAmount
 
@@ -141,7 +136,7 @@ export default function ManualEntryPage() {
             onClick={() => setIsEditingHeader(true)}
           >
             <h2 className="text-2xl font-bold uppercase tracking-wide truncate">
-              {bill.restaurantName}
+              {bill.name}
             </h2>
             <p className="text-sm text-gray-600 mt-1">{bill.date}</p>
           </div>
@@ -346,7 +341,7 @@ export default function ManualEntryPage() {
             isOpen={isEditingHeader}
             onClose={() => setIsEditingHeader(false)}
             onSave={handleSaveHeader}
-            restaurantName={bill.restaurantName}
+            restaurantName={bill.name}
             date={bill.date}
           />
         </div>

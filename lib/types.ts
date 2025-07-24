@@ -1,45 +1,34 @@
-export interface User {
+export type Person = {
   id: string
   name: string
-  initials: string
   color: string
-  email?: string
+  authUserId?: string
   createdAt?: Date
   updatedAt?: Date
 }
 
-export interface BillItem {
+export type BillItem = {
   id: string
   name: string
   price: number
-  assignedUsers: string[] // Array of user IDs
-  quantity?: number
-  category?: string
-  notes?: string
+  assignedUsers: Person[]
 }
 
-export interface Bill {
+export type PercentageSurcharge = {
   id: string
-  restaurantName: string
+  name: string
+  percentage: number
+}
+
+export type Bill = {
+  id: string
+  name: string
   date: string
   items: BillItem[]
-  totalAmount: number
-  tax?: number
-  tip?: number
-  participants?: string[] // Array of user IDs
-  createdBy?: string // User ID
-  status?: "draft" | "finalized" | "settled"
+  percentageSurcharges: PercentageSurcharge[]
+  amount: number
+  participants?: Person[]
+  status?: "draft" | "finalised" | "settled"
   createdAt: Date
   updatedAt: Date
-}
-
-export interface Settlement {
-  id: string
-  billId: string
-  fromUserId: string
-  toUserId: string
-  amount: number
-  status: "pending" | "completed"
-  createdAt: Date
-  settledAt?: Date
 }
