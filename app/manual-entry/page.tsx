@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft, Plus, User } from "lucide-react"
+import { ArrowLeft, Plus, User, Percent } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import type { Bill, BillItem, User as UserType } from "@/lib/types"
 import { useRouter } from "next/navigation"
 import { EditItemModal } from "@/components/edit-item-modal"
+import { EditHeaderModal } from "@/components/edit-header-modal"
 
 // Mock data for demonstration
 const mockUsers: UserType[] = [
@@ -22,17 +23,19 @@ export default function ManualEntryPage() {
     id: "1",
     restaurantName: "Mario's Pizzeria",
     date: "23 July 2025",
-    items: [
-    ],
+    items: [],
     totalAmount: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
   })
 
+  const [tipPercentage, setTipPercentage] = useState(0)
+  const [isAddingTip, setIsAddingTip] = useState(false)
   const [newItemName, setNewItemName] = useState("")
   const [newItemPrice, setNewItemPrice] = useState("")
   const [isAddingItem, setIsAddingItem] = useState(false)
   const [editingItem, setEditingItem] = useState<BillItem | null>(null)
+  const [isEditingHeader, setIsEditingHeader] = useState(false)
 
   const addNewItem = () => {
     if (!newItemName.trim()) {
@@ -99,9 +102,21 @@ export default function ManualEntryPage() {
     setEditingItem(null)
   }
 
+  const handleSaveHeader = (restaurantName: string, date: string) => {
+    setBill((prev) => ({
+      ...prev,
+      restaurantName,
+      date,
+    }))
+  }
+
   const getUserInitials = (userIds: string[]) => {
     return userIds.map((id) => mockUsers.find((u) => u.id === id)?.initials).filter(Boolean)
   }
+
+  const subtotal = bill.totalAmount
+  const tipAmount = (subtotal * tipPercentage) / 100
+  const total = subtotal + tipAmount
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
@@ -121,12 +136,14 @@ export default function ManualEntryPage() {
         {/* Receipt Container */}
         <div className="bg-white mx-4 border-2 border-black rounded-lg overflow-hidden shadow-sm">
           {/* Receipt Header */}
-          <div className="bg-white p-6 text-center border-b border-dashed border-gray-400">
-            <h2 className="text-2xl font-bold uppercase tracking-wide">{bill.restaurantName}</h2>
+          <div 
+            className="bg-white p-6 text-center border-b border-dashed border-gray-400 cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => setIsEditingHeader(true)}
+          >
+            <h2 className="text-2xl font-bold uppercase tracking-wide truncate">
+              {bill.restaurantName}
+            </h2>
             <p className="text-sm text-gray-600 mt-1">{bill.date}</p>
-            <div className="mt-3 text-xs text-gray-500">
-              <p>Receipt #001</p>
-            </div>
           </div>
 
           {/* Receipt Items */}
@@ -135,46 +152,65 @@ export default function ManualEntryPage() {
             <div className="px-6 py-3 border-b border-dashed border-gray-300 text-xs font-mono uppercase tracking-wider text-gray-600">
               <div className="flex justify-between">
                 <span>Item</span>
-                <span>Price</span>
+                <div className="text-right">
+                  <span>Price</span>
+                  {tipPercentage > 0 && (
+                    <div className="text-[10px] text-gray-400 uppercase">
+                      (+tip)
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Items List */}
             <div className="font-mono text-sm">
-              {bill.items.map((item, index) => (
-                <Dialog key={item.id}>
-                  <DialogTrigger asChild>
-                    <div 
-                      className="px-6 py-2 hover:bg-gray-50 cursor-pointer transition-colors border-b border-dotted border-gray-200 last:border-b-0"
-                      onClick={() => setEditingItem(item)}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2 flex-1">
-                          <span className="font-medium">{item.name}</span>
-                          <div className="flex gap-1">
-                            {getUserInitials(item.assignedUsers).map((initials, i) => (
-                              <div
-                                key={i}
-                                className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-xs font-bold bg-white"
-                              >
-                                {initials}
+              {bill.items.map((item, index) => {
+                const itemTipAmount = tipPercentage > 0 ? (item.price * tipPercentage) / 100 : 0
+                const totalItemPrice = item.price + itemTipAmount
+
+                return (
+                  <Dialog key={item.id}>
+                    <DialogTrigger asChild>
+                      <div 
+                        className="px-6 py-2 hover:bg-gray-50 cursor-pointer transition-colors border-b border-dotted border-gray-200 last:border-b-0"
+                        onClick={() => setEditingItem(item)}
+                      >
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2 flex-1">
+                            <span className="font-medium truncate max-w-[200px]">{item.name}</span>
+                            <div className="flex gap-1">
+                              {getUserInitials(item.assignedUsers).map((initials, i) => (
+                                <div
+                                  key={i}
+                                  className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-xs font-bold bg-white"
+                                >
+                                  {initials}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-bold tabular-nums">£{totalItemPrice.toFixed(2)}</span>
+                            {tipPercentage > 0 && (
+                              <div className="text-[10px] text-gray-400">
+                                (£{item.price.toFixed(2)} + {tipPercentage}%)
                               </div>
-                            ))}
+                            )}
                           </div>
                         </div>
-                        <span className="font-bold tabular-nums">£{item.price.toFixed(2)}</span>
                       </div>
-                    </div>
-                  </DialogTrigger>
-                  <EditItemModal
-                    item={editingItem}
-                    isOpen={editingItem?.id === item.id}
-                    onClose={() => setEditingItem(null)}
-                    onSave={handleSaveEdit}
-                    onDelete={deleteItem}
-                  />
-                </Dialog>
-              ))}
+                    </DialogTrigger>
+                    <EditItemModal
+                      item={editingItem}
+                      isOpen={editingItem?.id === item.id}
+                      onClose={() => setEditingItem(null)}
+                      onSave={handleSaveEdit}
+                      onDelete={deleteItem}
+                    />
+                  </Dialog>
+                )
+              })}
               
               {/* Add Item Button (always visible) */}
               <div 
@@ -189,10 +225,33 @@ export default function ManualEntryPage() {
             </div>
 
             {/* Receipt Total (always visible) */}
-            <div className="px-6 py-4 border-t-2 border-dashed border-gray-400 bg-gray-50">
-              <div className="flex justify-between items-center font-mono">
-                <span className="text-lg font-bold uppercase">Total:</span>
-                <span className="text-xl font-bold tabular-nums">£{bill.totalAmount.toFixed(2)}</span>
+            <div className="px-6 py-4 border-t-2 border-dashed border-gray-400 bg-gray-50 space-y-2">
+              {/* Add Tip Button */}
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between items-center font-mono">
+                  <span className="text-lg font-bold uppercase flex items-center">Total:</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl font-bold tabular-nums">£{total.toFixed(2)}</span>
+                  </div>
+                </div>
+                {tipPercentage > 0 && (
+                  <div className="flex justify-end">
+                    <div className="text-xs font-mono tabular-nums text-gray-600">
+                      (£{tipAmount.toFixed(2)} tip)
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-between items-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsAddingTip(true)}
+                  className="flex items-center gap-2 text-gray-600 hover:text-black !px-0"
+                >
+                  <Percent className="w-4 h-4" />
+                  {tipPercentage > 0 ? `Tip (${tipPercentage}%)` : 'Add tip'}
+                </Button>
               </div>
             </div>
           </div>
@@ -239,6 +298,57 @@ export default function ManualEntryPage() {
               </div>
             </DialogContent>
           </Dialog>
+
+          {/* Add Tip Dialog */}
+          <Dialog open={isAddingTip} onOpenChange={setIsAddingTip}>
+            <DialogContent className="max-w-sm rounded-xl">
+              <DialogHeader>
+                <DialogTitle>Add Tip</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Tip Percentage (%)</label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={tipPercentage}
+                    onChange={(e) => setTipPercentage(Number(e.target.value))}
+                    placeholder="0"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setTipPercentage(0)
+                      setIsAddingTip(false)
+                    }}
+                  >
+                    Remove Tip
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsAddingTip(false)}
+                    className="bg-secondary text-white"
+                  >
+                    Apply
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add EditHeaderModal */}
+          <EditHeaderModal
+            isOpen={isEditingHeader}
+            onClose={() => setIsEditingHeader(false)}
+            onSave={handleSaveHeader}
+            restaurantName={bill.restaurantName}
+            date={bill.date}
+          />
         </div>
       </div>
     </div>

@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* set primary secondary colors and foreground and background to black and white  */
 @layer base {
   :root {
