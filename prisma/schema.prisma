@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["auth", "public"]
+}
+
+// Our application models (public schema)
+model Person {
+  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String
+  color               String
+  authUserId          String?              @map("auth_user_id") @db.Uuid
+  createdAt           DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime?            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  // Relations
+  billItemAssignments BillItemAssignment[]
+  billParticipants    BillParticipant[]
+  users               users?               @relation(fields: [authUserId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("people")
+  @@schema("public")
+}
+
+model Bill {
+  id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String
+  date                 DateTime              @db.Date
+  amount               Decimal               @db.Decimal(10, 2)
+  status               String?
+  createdAt            DateTime?             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime?             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  // Relations
+  items                BillItem[]
+  participants         BillParticipant[]
+  percentageSurcharges PercentageSurcharge[]
+
+  @@map("bills")
+  @@schema("public")
+}
+
+model BillItem {
+  id          String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  billId      String?              @map("bill_id") @db.Uuid
+  name        String
+  price       Decimal              @db.Decimal(10, 2)
+  
+  // Relations
+  assignments BillItemAssignment[]
+  bill        Bill?                @relation(fields: [billId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("bill_items")
+  @@schema("public")
+}
+
+model PercentageSurcharge {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  billId     String? @map("bill_id") @db.Uuid
+  name       String
+  percentage Decimal @db.Decimal(5, 2)
+  
+  // Relations
+  bill       Bill?   @relation(fields: [billId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("percentage_surcharges")
+  @@schema("public")
+}
+
+model BillParticipant {
+  billId   String @map("bill_id") @db.Uuid
+  personId String @map("person_id") @db.Uuid
+  
+  // Relations
+  bill     Bill   @relation(fields: [billId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  person   Person @relation(fields: [personId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([billId, personId])
+  @@map("bill_participants")
+  @@schema("public")
+}
+
+model BillItemAssignment {
+  billItemId String   @map("bill_item_id") @db.Uuid
+  personId   String   @map("person_id") @db.Uuid
+  
+  // Relations
+  billItem   BillItem @relation(fields: [billItemId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  person     Person   @relation(fields: [personId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([billItemId, personId])
+  @@map("bill_item_assignments")
+  @@schema("public")
+}
+
+// Minimal reference to Supabase auth.users (read-only)
+model users {
+  id     String   @id @db.Uuid
+  people Person[]
+
+  @@map("users")
+  @@schema("auth")
+}

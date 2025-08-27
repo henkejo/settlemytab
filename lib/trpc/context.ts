@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { prisma } from '@/lib/prisma';
 
 export async function createContext() {
   const supabase = await createClient();
@@ -13,12 +14,14 @@ export async function createContext() {
         process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!
       ),
       session: null,
+      prisma,
     };
   }
 
   return {
     supabase,
     session,
+    prisma,
   };
 }
 
