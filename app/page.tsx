@@ -2,33 +2,15 @@ import Link from "next/link"
 import { Camera, Edit3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { redirect } from 'next/navigation'
-import { createServerCaller } from '@/lib/trpc/server-caller'
-import { createClient } from '@/lib/supabase/server'
 
 async function createBill() {
   'use server'
   
-  const supabase = await createClient()
-  
-  // Check if we already have a session
-  const { data: { session } } = await supabase.auth.getSession()
-  
-  // If no session, sign in anonymously
-  if (!session) {
-    const { data, error } = await supabase.auth.signInAnonymously()
-    
-    if (error) {
-      console.error('Error signing in anonymously:', error)
-      throw new Error('Failed to authenticate')
-    }
-  }
-  
-  // Create the bill using server-side tRPC
-  const caller = await createServerCaller()
-  const bill = await caller.bill.create({})
+  // Generate a random bill ID
+  const billId = Math.random().toString(36).substring(2, 15)
   
   // Redirect to the bill page
-  redirect(`/bill/${bill.id}`)
+  redirect(`/bill/${billId}`)
 }
 
 export default function HomePage() {

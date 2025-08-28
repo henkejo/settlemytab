@@ -10,16 +10,38 @@ import { useRouter } from "next/navigation"
 import { EditItemModal } from "@/components/edit-item-modal"
 import { EditHeaderModal } from "@/components/edit-header-modal"
 
+// Dummy data
+const dummyPeople: Person[] = [
+  { id: "1", name: "Alice", email: "alice@example.com", createdAt: new Date(), updatedAt: new Date() },
+  { id: "2", name: "Bob", email: "bob@example.com", createdAt: new Date(), updatedAt: new Date() },
+  { id: "3", name: "Charlie", email: "charlie@example.com", createdAt: new Date(), updatedAt: new Date() },
+]
+
+const dummyItems: BillItem[] = [
+  { id: "1", name: "Margherita Pizza", price: 12.99, billId: "1", createdAt: new Date(), updatedAt: new Date() },
+  { id: "2", name: "Pepperoni Pizza", price: 14.99, billId: "1", createdAt: new Date(), updatedAt: new Date() },
+  { id: "3", name: "Garlic Bread", price: 4.99, billId: "1", createdAt: new Date(), updatedAt: new Date() },
+  { id: "4", name: "Coke", price: 2.99, billId: "1", createdAt: new Date(), updatedAt: new Date() },
+]
+
 export default function ManualEntryPage() {
   const router = useRouter()
 
   const [bill, setBill] = useState<Bill>({
     id: "1",
     name: "Mario's Pizzeria",
-    date: "23 July 2025",
-    items: [],
+    date: new Date("2025-07-23"),
+    items: dummyItems,
     percentageSurcharges: [],
-    amount: 0,
+    participants: dummyPeople.map(person => ({
+      id: person.id,
+      billId: "1",
+      personId: person.id,
+      person,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })),
+    status: "draft",
     createdAt: new Date(),
     updatedAt: new Date(),
   })
@@ -48,13 +70,14 @@ export default function ManualEntryPage() {
       id: Date.now().toString(),
       name: newItemName.trim(),
       price: price,
-      assignedUsers: [],
+      billId: bill.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }
 
     setBill((prev) => ({
       ...prev,
       items: [...prev.items, newItem],
-      amount: prev.amount + newItem.price,
     }))
 
     setNewItemName("")
@@ -66,7 +89,6 @@ export default function ManualEntryPage() {
     if (!editingItem) return
 
     setBill((prev) => {
-      const oldPrice = editingItem.price
       const newItems = prev.items.map(item => 
         item.id === editingItem.id 
           ? { ...item, name, price }
@@ -76,7 +98,6 @@ export default function ManualEntryPage() {
       return {
         ...prev,
         items: newItems,
-        amount: prev.amount - oldPrice + price,
       }
     })
 
@@ -91,7 +112,6 @@ export default function ManualEntryPage() {
       return {
         ...prev,
         items: prev.items.filter(item => item.id !== itemId),
-        amount: prev.amount - itemToDelete.price,
       }
     })
     setEditingItem(null)
@@ -101,15 +121,11 @@ export default function ManualEntryPage() {
     setBill((prev) => ({
       ...prev,
       name: restaurantName,
-      date,
+      date: new Date(date),
     }))
   }
 
-  const getUserInitials = (users: Person[]) => {
-    return users.map((user) => user.name.slice(0, 2).toUpperCase()).filter(Boolean)
-  }
-
-  const subtotal = bill.amount
+  const subtotal = bill.items.reduce((sum, item) => sum + item.price, 0)
   const tipAmount = (subtotal * tipPercentage) / 100
   const total = subtotal + tipAmount
 
@@ -138,7 +154,7 @@ export default function ManualEntryPage() {
             <h2 className="text-2xl font-bold uppercase tracking-wide truncate">
               {bill.name}
             </h2>
-            <p className="text-sm text-gray-600 mt-1">{bill.date}</p>
+            <p className="text-sm text-gray-600 mt-1">{bill.date.toLocaleDateString()}</p>
           </div>
 
           {/* Receipt Items */}
@@ -175,14 +191,13 @@ export default function ManualEntryPage() {
                           <div className="flex items-center gap-2 flex-1">
                             <span className="font-medium truncate max-w-[200px]">{item.name}</span>
                             <div className="flex gap-1">
-                              {getUserInitials(item.assignedUsers).map((initials, i) => (
-                                <div
-                                  key={i}
-                                  className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-xs font-bold bg-white"
-                                >
-                                  {initials}
-                                </div>
-                              ))}
+                              {/* Dummy user assignments */}
+                              <div className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-xs font-bold bg-white">
+                                A
+                              </div>
+                              <div className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-xs font-bold bg-white">
+                                B
+                              </div>
                             </div>
                           </div>
                           <div className="text-right">
@@ -342,7 +357,7 @@ export default function ManualEntryPage() {
             onClose={() => setIsEditingHeader(false)}
             onSave={handleSaveHeader}
             restaurantName={bill.name}
-            date={bill.date}
+            date={bill.date.toISOString().split('T')[0]}
           />
         </div>
       </div>

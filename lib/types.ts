@@ -1,53 +1,81 @@
-import { Prisma } from '@prisma/client'
+// Basic types for the application
+export interface Person {
+  id: string
+  name: string
+  email?: string
+  createdAt: Date
+  updatedAt: Date
+}
 
-// Prisma-generated types
-export type Person = Prisma.PersonGetPayload<{}>
-export type Bill = Prisma.BillGetPayload<{}>
-export type BillItem = Prisma.BillItemGetPayload<{}>
-export type PercentageSurcharge = Prisma.PercentageSurchargeGetPayload<{}>
-export type BillParticipant = Prisma.BillParticipantGetPayload<{}>
-export type BillItemAssignment = Prisma.BillItemAssignmentGetPayload<{}>
+export interface BillItem {
+  id: string
+  name: string
+  price: number
+  billId: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface PercentageSurcharge {
+  id: string
+  name: string
+  percentage: number
+  billId: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface BillParticipant {
+  id: string
+  billId: string
+  personId: string
+  person: Person
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface BillItemAssignment {
+  id: string
+  billItemId: string
+  personId: string
+  person: Person
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Bill {
+  id: string
+  name: string
+  date: Date
+  items: BillItem[]
+  percentageSurcharges: PercentageSurcharge[]
+  participants: BillParticipant[]
+  status: "draft" | "finalised" | "settled"
+  createdAt: Date
+  updatedAt: Date
+}
 
 // Extended types with relations
-export type BillWithDetails = Prisma.BillGetPayload<{
-  include: {
-    items: {
-      include: {
-        assignments: {
-          include: {
-            person: true
-          }
-        }
-      }
-    }
-    percentageSurcharges: true
-    participants: {
-      include: {
-        person: true
-      }
-    }
-  }
-}>
+export interface BillWithDetails extends Bill {
+  items: (BillItem & {
+    assignments: BillItemAssignment[]
+  })[]
+  participants: BillParticipant[]
+}
 
-export type BillItemWithAssignments = Prisma.BillItemGetPayload<{
-  include: {
-    assignments: {
-      include: {
-        person: true
-      }
-    }
-  }
-}>
+export interface BillItemWithAssignments extends BillItem {
+  assignments: BillItemAssignment[]
+}
 
 // Legacy type compatibility (for gradual migration)
-export type LegacyBillItem = {
+export interface LegacyBillItem {
   id: string
   name: string
   price: number
   assignedUsers: Person[]
 }
 
-export type LegacyBill = {
+export interface LegacyBill {
   id: string
   name: string
   date: string

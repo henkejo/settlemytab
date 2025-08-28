@@ -1,55 +1,29 @@
 import type { Bill, Person } from "@/lib/types"
 
+// Dummy function for now - will be replaced with Convex implementation
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function calculateUserShare(bill: Bill, userId: string): number {
-  const userItems = bill.items.filter((item) => item.assignedUsers.includes(userId))
-
-  let totalShare = 0
-
-  userItems.forEach((item) => {
-    const sharePerPerson = item.price / item.assignedUsers.length
-    totalShare += sharePerPerson
-  })
-
-  return totalShare
+  // For now, return a dummy calculation (ignoring userId)
+  const totalBill = bill.items.reduce((sum, item) => sum + item.price, 0)
+  const participantCount = bill.participants.length
+  return participantCount > 0 ? totalBill / participantCount : 0
 }
 
 export function calculateSettlements(bill: Bill, users: Person[]) {
+  // Dummy settlements for now
   const settlements: { from: string; to: string; amount: number }[] = []
-  const userShares: { [userId: string]: number } = {}
-
-  // Calculate what each user owes
-  users.forEach((user) => {
-    userShares[user.id] = calculateUserShare(bill, user.id)
-  })
-
-  const totalBill = bill.amount
-  const averageShare = totalBill / users.length
-
-  // Calculate who owes whom
-  const balances: { [userId: string]: number } = {}
-  users.forEach((user) => {
-    balances[user.id] = userShares[user.id] - averageShare
-  })
-
-  // Create settlements (simplified algorithm)
-  const debtors = Object.entries(balances).filter(([, balance]) => balance > 0)
-  const creditors = Object.entries(balances).filter(([, balance]) => balance < 0)
-
-  debtors.forEach(([debtorId, debt]) => {
-    creditors.forEach(([creditorId, credit]) => {
-      if (debt > 0 && credit < 0) {
-        const settlementAmount = Math.min(debt, Math.abs(credit))
-        settlements.push({
-          from: debtorId,
-          to: creditorId,
-          amount: settlementAmount,
-        })
-
-        balances[debtorId] -= settlementAmount
-        balances[creditorId] += settlementAmount
-      }
+  
+  if (users.length >= 2) {
+    const totalBill = bill.items.reduce((sum, item) => sum + item.price, 0)
+    const averageShare = totalBill / users.length
+    
+    // Create a simple settlement where the first person pays the second
+    settlements.push({
+      from: users[0].id,
+      to: users[1].id,
+      amount: averageShare / 2,
     })
-  })
+  }
 
   return settlements
 }
