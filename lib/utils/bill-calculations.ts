@@ -4,9 +4,9 @@ import type { Bill, Person } from "@/lib/types"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function calculateUserShare(bill: Bill, userId: string): number {
   // For now, return a dummy calculation (ignoring userId)
-  const totalBill = bill.items.reduce((sum, item) => sum + item.price, 0)
-  const participantCount = bill.participants.length
-  return participantCount > 0 ? totalBill / participantCount : 0
+  // Note: This will need to be updated when we implement actual Convex queries
+  // that fetch related items and participants
+  return 0
 }
 
 export function calculateSettlements(bill: Bill, users: Person[]) {
@@ -14,14 +14,12 @@ export function calculateSettlements(bill: Bill, users: Person[]) {
   const settlements: { from: string; to: string; amount: number }[] = []
   
   if (users.length >= 2) {
-    const totalBill = bill.items.reduce((sum, item) => sum + item.price, 0)
-    const averageShare = totalBill / users.length
-    
-    // Create a simple settlement where the first person pays the second
+    // Note: This will need to be updated when we implement actual Convex queries
+    // that fetch related items and participants
     settlements.push({
-      from: users[0].id,
-      to: users[1].id,
-      amount: averageShare / 2,
+      from: users[0]._id,
+      to: users[1]._id,
+      amount: 0,
     })
   }
 

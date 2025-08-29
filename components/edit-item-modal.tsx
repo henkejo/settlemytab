@@ -75,7 +75,7 @@ export function EditItemModal({
           <div className="flex justify-between">
             <Button
               variant="destructive"
-              onClick={() => item && onDelete(item.id)}
+              onClick={() => item && onDelete(item._id)}
               className="bg-red-500 text-white hover:bg-red-600"
             >
               Delete

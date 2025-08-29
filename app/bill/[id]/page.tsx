@@ -10,41 +10,39 @@ import { useRouter } from "next/navigation"
 import { EditItemModal } from "@/components/edit-item-modal"
 import { EditHeaderModal } from "@/components/edit-header-modal"
 
-// Dummy data
+// Dummy data - Note: These will be replaced with actual Convex queries
 const dummyPeople: Person[] = [
-  { id: "1", name: "Alice", email: "alice@example.com", createdAt: new Date(), updatedAt: new Date() },
-  { id: "2", name: "Bob", email: "bob@example.com", createdAt: new Date(), updatedAt: new Date() },
-  { id: "3", name: "Charlie", email: "charlie@example.com", createdAt: new Date(), updatedAt: new Date() },
+  { _id: "1" as any, name: "Alice", email: "alice@example.com", _creationTime: Date.now() },
+  { _id: "2" as any, name: "Bob", email: "bob@example.com", _creationTime: Date.now() },
+  { _id: "3" as any, name: "Charlie", email: "charlie@example.com", _creationTime: Date.now() },
 ]
 
 const dummyItems: BillItem[] = [
-  { id: "1", name: "Margherita Pizza", price: 12.99, billId: "1", createdAt: new Date(), updatedAt: new Date() },
-  { id: "2", name: "Pepperoni Pizza", price: 14.99, billId: "1", createdAt: new Date(), updatedAt: new Date() },
-  { id: "3", name: "Garlic Bread", price: 4.99, billId: "1", createdAt: new Date(), updatedAt: new Date() },
-  { id: "4", name: "Coke", price: 2.99, billId: "1", createdAt: new Date(), updatedAt: new Date() },
+  { _id: "1" as any, name: "Margherita Pizza", price: 12.99, billId: "1" as any, _creationTime: Date.now() },
+  { _id: "2" as any, name: "Pepperoni Pizza", price: 14.99, billId: "1" as any, _creationTime: Date.now() },
+  { _id: "3" as any, name: "Garlic Bread", price: 4.99, billId: "1" as any, _creationTime: Date.now() },
+  { _id: "4" as any, name: "Coke", price: 2.99, billId: "1" as any, _creationTime: Date.now() },
 ]
 
 export default function ManualEntryPage() {
   const router = useRouter()
 
   const [bill, setBill] = useState<Bill>({
-    id: "1",
+    _id: "1" as any,
     name: "Mario's Pizzeria",
-    date: new Date("2025-07-23"),
-    items: dummyItems,
-    percentageSurcharges: [],
-    participants: dummyPeople.map(person => ({
-      id: person.id,
-      billId: "1",
-      personId: person.id,
-      person,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    })),
+    date: "2025-07-23",
     status: "draft",
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    _creationTime: Date.now(),
   })
+
+  // Separate state for related data (will be fetched via Convex queries)
+  const [billItems, setBillItems] = useState<BillItem[]>(dummyItems)
+  const [billParticipants, setBillParticipants] = useState(dummyPeople.map(person => ({
+    _id: person._id,
+    billId: bill._id,
+    personId: person._id,
+    _creationTime: Date.now(),
+  })))
 
   const [tipPercentage, setTipPercentage] = useState(0)
   const [isAddingTip, setIsAddingTip] = useState(false)
@@ -67,18 +65,14 @@ export default function ManualEntryPage() {
     }
 
     const newItem: BillItem = {
-      id: Date.now().toString(),
+      _id: Date.now().toString() as any,
       name: newItemName.trim(),
       price: price,
-      billId: bill.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      billId: bill._id,
+      _creationTime: Date.now(),
     }
 
-    setBill((prev) => ({
-      ...prev,
-      items: [...prev.items, newItem],
-    }))
+    setBillItems((prev) => [...prev, newItem])
 
     setNewItemName("")
     setNewItemPrice("")
@@ -88,32 +82,19 @@ export default function ManualEntryPage() {
   const handleSaveEdit = (name: string, price: number) => {
     if (!editingItem) return
 
-    setBill((prev) => {
-      const newItems = prev.items.map(item => 
-        item.id === editingItem.id 
+    setBillItems((prev) => 
+      prev.map(item => 
+        item._id === editingItem._id 
           ? { ...item, name, price }
           : item
       )
-      
-      return {
-        ...prev,
-        items: newItems,
-      }
-    })
+    )
 
     setEditingItem(null)
   }
 
   const deleteItem = (itemId: string) => {
-    setBill((prev) => {
-      const itemToDelete = prev.items.find(item => item.id === itemId)
-      if (!itemToDelete) return prev
-
-      return {
-        ...prev,
-        items: prev.items.filter(item => item.id !== itemId),
-      }
-    })
+    setBillItems((prev) => prev.filter(item => item._id !== itemId))
     setEditingItem(null)
   }
 
@@ -121,11 +102,11 @@ export default function ManualEntryPage() {
     setBill((prev) => ({
       ...prev,
       name: restaurantName,
-      date: new Date(date),
+      date: date,
     }))
   }
 
-  const subtotal = bill.items.reduce((sum, item) => sum + item.price, 0)
+  const subtotal = billItems.reduce((sum, item) => sum + item.price, 0)
   const tipAmount = (subtotal * tipPercentage) / 100
   const total = subtotal + tipAmount
 
@@ -154,7 +135,7 @@ export default function ManualEntryPage() {
             <h2 className="text-2xl font-bold uppercase tracking-wide truncate">
               {bill.name}
             </h2>
-            <p className="text-sm text-gray-600 mt-1">{bill.date.toLocaleDateString()}</p>
+            <p className="text-sm text-gray-600 mt-1">{new Date(bill.date).toLocaleDateString()}</p>
           </div>
 
           {/* Receipt Items */}
@@ -176,12 +157,12 @@ export default function ManualEntryPage() {
 
             {/* Items List */}
             <div className="font-mono text-sm">
-              {bill.items.map((item) => {
+              {billItems.map((item) => {
                 const itemTipAmount = tipPercentage > 0 ? (item.price * tipPercentage) / 100 : 0
                 const totalItemPrice = item.price + itemTipAmount
 
                 return (
-                  <Dialog key={item.id}>
+                  <Dialog key={item._id}>
                     <DialogTrigger asChild>
                       <div 
                         className="px-6 py-2 hover:bg-gray-50 cursor-pointer transition-colors border-b border-dotted border-gray-200 last:border-b-0"
@@ -211,13 +192,13 @@ export default function ManualEntryPage() {
                         </div>
                       </div>
                     </DialogTrigger>
-                    <EditItemModal
-                      item={editingItem}
-                      isOpen={editingItem?.id === item.id}
-                      onClose={() => setEditingItem(null)}
-                      onSave={handleSaveEdit}
-                      onDelete={deleteItem}
-                    />
+                                          <EditItemModal
+                        item={editingItem}
+                        isOpen={editingItem?._id === item._id}
+                        onClose={() => setEditingItem(null)}
+                        onSave={handleSaveEdit}
+                        onDelete={deleteItem}
+                      />
                   </Dialog>
                 )
               })}
@@ -357,7 +338,7 @@ export default function ManualEntryPage() {
             onClose={() => setIsEditingHeader(false)}
             onSave={handleSaveHeader}
             restaurantName={bill.name}
-            date={bill.date.toISOString().split('T')[0]}
+            date={bill.date}
           />
         </div>
       </div>
