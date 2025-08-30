@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -13,6 +13,14 @@ export function ConvexExample() {
   // Queries
   const bills = useQuery(api.bills.getBills);
   const createBillMutation = useMutation(api.bills.createBill);
+
+  // Console log to fetch and display bills
+  useEffect(() => {
+    if (bills) {
+      console.log("Fetched bills from database:", bills);
+      console.log("Total bills:", bills.length);
+    }
+  }, [bills]);
 
   const handleCreateBill = async () => {
     if (!newBillName.trim() || !newBillDate) return;

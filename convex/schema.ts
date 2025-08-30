@@ -1,4 +1,4 @@
-import { defineEnt, defineEntSchema, defineEntsFromTables } from "convex-ents";
+import { defineEnt, defineEntSchema, defineEntsFromTables, getEntDefinitions } from "convex-ents";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
 
@@ -19,7 +19,11 @@ const schema = defineEntSchema({
   bills: defineEnt({
     name: v.string(),
     date: v.string(), // ISO date string
-    status: v.union(v.literal("draft"), v.literal("finalised"), v.literal("settled")),
+    status: v.union(
+      v.literal("draft"), 
+      v.literal("finalised"), 
+      v.literal("settled")
+    ),
   })
   .edges("billParticipants", { ref: true })
   .edges("billItems", { ref: true })
@@ -29,7 +33,6 @@ const schema = defineEntSchema({
   billItems: defineEnt({
     name: v.string(),
     price: v.number(),
-    billId: v.id("bills"),
   })
   .edge("bill"),
 
@@ -42,5 +45,7 @@ const schema = defineEntSchema({
   
 
 });
-
 export default schema;
+
+export const entDefinitions = getEntDefinitions(schema);
+
