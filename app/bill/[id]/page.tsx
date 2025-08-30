@@ -9,6 +9,8 @@ import type { Bill, BillItem, Person } from "@/lib/types"
 import { useRouter } from "next/navigation"
 import { EditItemModal } from "@/components/edit-item-modal"
 import { EditHeaderModal } from "@/components/edit-header-modal"
+import { useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
 
 // Dummy data - Note: These will be replaced with actual Convex queries
 const dummyPeople: Person[] = [
@@ -26,6 +28,10 @@ const dummyItems: BillItem[] = [
 
 export default function ManualEntryPage() {
   const router = useRouter()
+
+  // Test the getBills query with console log
+  const bills = useQuery(api.bills.getBills)
+  console.log("getBills query result:", bills)
 
   const [bill, setBill] = useState<Bill>({
     _id: "1" as any,

@@ -1,10 +1,10 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation } from "./functions";
 import { v } from "convex/values";
 
 // Query to get a bill by ID
-export const getBill = query({
-  args: { billId: v.id("bills") },
+export const getBills = query({
+  args: {},
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.billId);
+    return await ctx.table("bills").take(5);
   },
 });
